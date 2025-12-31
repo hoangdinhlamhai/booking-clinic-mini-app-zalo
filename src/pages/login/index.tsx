@@ -45,22 +45,39 @@ export default function LoginPage() {
         try {
             // 1. Check if user has granted permission
             const settings = await getSetting({});
+            console.log("[ZaloLogin] Settings:", settings);
 
             if (!settings.authSetting["scope.userInfo"]) {
                 // Request permission if not granted
+                console.log("[ZaloLogin] Requesting userInfo permission...");
                 await authorize({
                     scopes: ["scope.userInfo"],
                 });
             }
 
             // 2. Get Zalo access token from the Mini App
-            const zaloAccessToken = await getAccessToken({});
+            console.log("[ZaloLogin] Getting access token...");
+            const tokenResult = await getAccessToken({});
+            console.log("[ZaloLogin] Token result:", tokenResult);
+
+            // getAccessToken returns the token string directly
+            const zaloAccessToken = typeof tokenResult === 'string'
+                ? tokenResult
+                : (tokenResult as any)?.accessToken || tokenResult;
 
             if (!zaloAccessToken) {
-                throw new Error("Không thể lấy access token từ Zalo");
+                // Check if we're likely in development mode
+                const isDev = window.location.hostname === 'localhost'
+                    || window.location.hostname.includes('127.0.0.1')
+                    || window.location.port !== '';
+
+                if (isDev) {
+                    throw new Error("Đăng nhập Zalo chỉ hoạt động trên ứng dụng Zalo thực. Trong môi trường phát triển, vui lòng sử dụng đăng nhập bằng Email/Mật khẩu.");
+                }
+                throw new Error("Không thể lấy access token từ Zalo. Vui lòng thử lại.");
             }
 
-            console.log("[ZaloLogin] Got Zalo access token");
+            console.log("[ZaloLogin] Got Zalo access token:", zaloAccessToken.substring(0, 20) + "...");
 
             // 3. Send to our backend for verification and JWT generation
             const response = await api.post("/api/auth/zalo", {
