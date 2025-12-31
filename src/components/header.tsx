@@ -1,10 +1,16 @@
 import React from "react";
-import { useNavigate } from "zmp-ui";
+import { useNavigate, useLocation } from "zmp-ui";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Header() {
     const { user, isLoading, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Hide header on login and register pages
+    if (location.pathname === "/login" || location.pathname === "/register") {
+        return null;
+    }
 
     return (
         <header className="bg-white border-b border-slate-100 sticky top-0 z-50">
