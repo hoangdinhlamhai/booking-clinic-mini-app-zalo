@@ -1,0 +1,140 @@
+import { useNavigate } from "zmp-ui";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+import { generateSepayQR } from "@/lib/payment/sepayqr";
+import { useSearchParams } from "react-router-dom"; // ZMP uses standard router hooks often or ZMPRouter equivalent
+// Actually ZMP router logic: 
+// In ZMP, getting query params is often done via standard location.search or a specific hook provided by router lib.
+// zmp-ui uses react-router-dom under the hood usually, but let's check standard usage.
+// Standard safe way:
+const usePayment = () => {
+    // In Mini App, window.location.search might be available if using standard browser routing,
+    // but better to rely on what works in the framework usually.
+    // Let's safe-parse from window.location first.
+
+    // NOTE: In ZMP, usually pages are rendered and we can use URLSearchParams on location.search
+    const [bookingId, setBookingId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const id = params.get("bookingId");
+        if (id) setBookingId(id);
+    }, []);
+
+    return { bookingId };
+};
+
+type BookingResponse = {
+    id: string;
+    status: "pending" | "paid" | "expired";
+    amount: number;
+};
+
+// Main Component
+import { Page, Text, Button } from "zmp-ui";
+import { Loader2 } from "lucide-react";
+
+export default function PaymentPage() {
+    const { bookingId } = usePayment();
+    const navigate = useNavigate();
+    const [booking, setBooking] = useState<BookingResponse | null>(null);
+
+    useEffect(() => {
+        if (!bookingId) return;
+
+        api.get(`/api/bookings/${bookingId}`)
+            .then((res) => {
+                if (res.data?.id) {
+                    setBooking(res.data);
+                }
+            })
+            .catch(() => { });
+    }, [bookingId]);
+
+    useEffect(() => {
+        if (!bookingId) return;
+
+        const timer = setInterval(async () => {
+            try {
+                const res = await api.get(`/api/bookings/${bookingId}`);
+                const data = res.data;
+
+                if (!data?.status) return;
+
+                setBooking(data);
+
+                // if (data.status === "paid") {
+                //   navigate(`/result?bookingId=${bookingId}&status=paid`);
+                // }
+                // if (data.status === "expired") {
+                //   navigate(`/result?bookingId=${bookingId}&status=expired`);
+                // }
+
+                // ZMP navigate often replaces
+                if (data.status === "paid") {
+                    navigate(`/result?bookingId=${bookingId}&status=paid`, { replace: true });
+                }
+                if (data.status === "expired") {
+                    navigate(`/result?bookingId=${bookingId}&status=expired`, { replace: true });
+                }
+
+            } catch (e) { }
+        }, 3000);
+
+        return () => clearInterval(timer);
+    }, [bookingId, navigate]);
+
+    if (!booking) {
+        return (
+            <Page className="flex items-center justify-center min-h-screen">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="animate-spin text-blue-600 w-8 h-8" />
+                    <Text>Đang tạo mã thanh toán...</Text>
+                </div>
+            </Page>
+        );
+    }
+
+    const qrUrl = generateSepayQR({
+        bankCode: "TPB",
+        accountNo: "10002981957",
+        amount: booking.amount,
+        description: `DATLICH_${booking.id}`,
+    });
+
+    return (
+        <Page className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="bg-white p-6 rounded-xl text-center space-y-4 shadow-lg mx-4 w-full max-w-sm">
+                <h1 className="text-lg font-semibold text-slate-900">Thanh toán giữ lịch</h1>
+
+                <div className="flex justify-center">
+                    <img src={qrUrl} className="w-64 h-64 object-contain" alt="QR Code" />
+                </div>
+
+                <p className="text-sm text-slate-600">
+                    Nội dung chuyển khoản:
+                    <br />
+                    <b className="text-lg select-all">DATLICH_{booking.id}</b>
+                </p>
+
+                <span
+                    className={`inline-block px-4 py-2 rounded-full text-sm font-medium
+          ${booking.status === "pending" && "bg-orange-100 text-orange-600"}
+          ${booking.status === "paid" && "bg-green-100 text-green-600"}
+          ${booking.status === "expired" && "bg-red-100 text-red-600"}
+        `}
+                >
+                    {booking.status === "pending" && "Chờ thanh toán"}
+                    {booking.status === "paid" && "Đã thanh toán"}
+                    {booking.status === "expired" && "Hết hạn"}
+                </span>
+
+                <div className="pt-4">
+                    <Button variant="secondary" onClick={() => navigate("/")} fullWidth>
+                        Trở về trang chủ
+                    </Button>
+                </div>
+            </div>
+        </Page>
+    );
+}
