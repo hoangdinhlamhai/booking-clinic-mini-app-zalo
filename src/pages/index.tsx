@@ -106,11 +106,10 @@ export default function HomePage() {
                   return (
                     <div
                       key={index}
-                      className={`transition-all duration-500 ${
-                        index === active
-                          ? "opacity-100 scale-100"
-                          : "opacity-0 scale-95 absolute inset-0 pointer-events-none"
-                      }`}
+                      className={`transition-all duration-500 ${index === active
+                        ? "opacity-100 scale-100"
+                        : "opacity-0 scale-95 absolute inset-0 pointer-events-none"
+                        }`}
                     >
                       <div className="flex items-start gap-4">
                         <div className="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center">
@@ -135,11 +134,10 @@ export default function HomePage() {
                     <button
                       key={index}
                       onClick={() => setActive(index)}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        index === active
-                          ? "w-8 bg-blue-600"
-                          : "w-2 bg-slate-300 hover:bg-slate-400"
-                      }`}
+                      className={`h-2 rounded-full transition-all duration-300 ${index === active
+                        ? "w-8 bg-blue-600"
+                        : "w-2 bg-slate-300 hover:bg-slate-400"
+                        }`}
                       aria-label={`Go to slide ${index + 1}`}
                     />
                   ))}

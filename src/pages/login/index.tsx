@@ -200,9 +200,9 @@ export default function LoginPage() {
                         ) : (
                             <>
                                 {/* Zalo Icon */}
-                                <svg viewBox="0 0 48 48" className="w-5 h-5" fill="currentColor">
+                                {/* <svg viewBox="0 0 48 48" className="w-5 h-5" fill="currentColor">
                                     <path d="M24 4C12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20S35.046 4 24 4zm8.5 26.5c-.276 0-.5-.224-.5-.5V18.5c0-.276.224-.5.5-.5h2c.276 0 .5.224.5.5V30c0 .276-.224.5-.5.5h-2zm-16-12h7.3l-7.8 10.4v1.6h10.5v-2h-7.3l7.8-10.4v-1.6H16.5v2zm-3 0c-.276 0-.5.224-.5.5v8c0 .276.224.5.5.5h2c.276 0 .5-.224.5-.5v-8c0-.276-.224-.5-.5-.5h-2z" />
-                                </svg>
+                                </svg> */}
                                 <span>Zalo</span>
                             </>
                         )}

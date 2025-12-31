@@ -1,3 +1,5 @@
+const plugin = require("tailwindcss/plugin");
+
 module.exports = {
   darkMode: ["selector", '[zaui-theme="dark"]'],
   purge: {
@@ -11,4 +13,27 @@ module.exports = {
       },
     },
   },
+  plugins: [
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        ".scrollbar-hide": {
+          /* Firefox */
+          "scrollbar-width": "none",
+          /* Safari and Chrome (WebKit) */
+          "&::-webkit-scrollbar": {
+            display: "none",
+          },
+          /* IE and Edge */
+          "-ms-overflow-style": "none",
+        },
+        ".scrollbar-default": {
+          "scrollbar-width": "auto",
+          "&::-webkit-scrollbar": {
+            display: "block",
+          },
+          "-ms-overflow-style": "auto",
+        },
+      });
+    }),
+  ],
 };
