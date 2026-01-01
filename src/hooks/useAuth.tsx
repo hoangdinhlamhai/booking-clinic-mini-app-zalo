@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { getUserInfo } from "zmp-sdk";
+import React, { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import api from "../lib/api";
 
 type User = {
@@ -9,14 +8,23 @@ type User = {
     email?: string;
 };
 
-export function useAuth() {
+type AuthContextType = {
+    user: User | null;
+    isLoading: boolean;
+    login: (token: string, userData: User) => void;
+    logout: () => void;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     // Initialize auth state
     useEffect(() => {
         const initAuth = async () => {
-            // 1. Check for system token (Clinic Login)
+            // Check for system token (Clinic Login)
             const token = localStorage.getItem("accessToken");
             if (token) {
                 try {
@@ -24,23 +32,13 @@ export function useAuth() {
                     if (res.data && res.data.user) {
                         setUser(res.data.user);
                         setIsLoading(false);
-                        return; // Found system user, done.
+                        return;
                     }
                 } catch (error) {
                     console.error("Token invalid", error);
                     localStorage.removeItem("accessToken");
                 }
             }
-
-            // 2. If no system token, fall back to Zalo User Info (Optional)
-            // Or we can just leave it as null if you ONLY want Clinic Login
-            // For now, let's keep Zalo info as fallback or just comment it out 
-            // if this strictly requires Clinic Account. 
-            // Given the requirement "convert login", likely they want the logic from the FE,
-            // which uses a database user.
-
-            // Let's rely ONLY on the token for "User" identity in this context 
-            // to match the original app's behavior.
             setIsLoading(false);
         };
 
@@ -57,5 +55,17 @@ export function useAuth() {
         setUser(null);
     };
 
-    return { user, isLoading, login, logout };
+    return (
+        <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+            {children}
+        </AuthContext.Provider>
+    );
+}
+
+export function useAuth() {
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+    return context;
 }

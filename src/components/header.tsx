@@ -7,8 +7,8 @@ export default function Header() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Hide header on login and register pages
-    if (location.pathname === "/login" || location.pathname === "/register") {
+    // Hide header
+    if (location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/payment") {
         return null;
     }
 
