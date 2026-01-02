@@ -2,8 +2,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Page, useNavigate, Input, Button } from "zmp-ui";
 import { Loader2, Send } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import api from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
+import { BookingConfirmData } from "@/pages/confirm-booking/index";
 
 // Types
 type Clinic = {
@@ -38,7 +40,9 @@ type ChatStep =
 
 interface BookingFormState {
     clinic?: string;
+    clinicName?: string;
     service?: string;
+    serviceName?: string;
     name: string;
     phone: string;
     time: string;
@@ -55,6 +59,7 @@ interface Message {
 export default function ChatPage() {
     const { isLoading: authLoading, user } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Chat State
     const [messages, setMessages] = useState<Message[]>([
@@ -79,6 +84,52 @@ export default function ChatPage() {
         symptoms: "",
         gender: true,
     });
+
+    // Handle return from ConfirmBookingPage
+    useEffect(() => {
+        const state = location.state as { returnFromConfirm?: boolean; bookingData?: BookingConfirmData } | null;
+        if (state?.returnFromConfirm && state?.bookingData) {
+            const data = state.bookingData;
+            // Restore form data
+            setForm({
+                name: data.name,
+                phone: data.phone,
+                gender: data.gender,
+                age: data.age,
+                symptoms: data.symptoms,
+                clinic: data.clinicId,
+                clinicName: data.clinicName,
+                service: data.serviceId,
+                serviceName: data.serviceName,
+                time: data.bookingTime,
+            });
+
+            // Reset date/time selection - user needs to choose again
+            setTempDay(""); // Reset to force user to select new date
+            setSlots([]); // Clear previous slots
+
+            // Reset to date selection step so user can choose again
+            setStep("date");
+            setShowDatePicker(true);
+            setMessages([
+                { from: "bot", text: "Bạn đã quay lại để chọn lại thông tin." },
+                {
+                    from: "bot", text: `Thông tin đã lưu:
+                                        - Họ tên: ${data.name}
+                                        - SĐT: ${data.phone}
+                                        - Giới tính: ${data.gender ? "Nam" : "Nữ"}
+                                        - Tuổi: ${data.age}
+                                        - Bệnh: ${data.symptoms}
+                                        - Phòng khám: ${data.clinicName}
+                                        - Dịch vụ: ${data.serviceName}`
+                },
+                { from: "bot", text: "Vui lòng chọn lại ngày khám:" },
+            ]);
+
+            // Clear navigation state to prevent re-triggering
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state]);
 
     // Scroll to bottom when messages change
     useEffect(() => {
@@ -158,25 +209,8 @@ export default function ChatPage() {
         }
     };
 
-    const createBooking = async (bookingTime: string) => {
-        try {
-            const res = await api.post("/api/bookings", {
-                name: form.name,
-                phone: form.phone,
-                gender: form.gender ? "male" : "female",
-                age: form.age,
-                symptoms: form.symptoms,
-                clinic: form.clinic,
-                service: form.service,
-                booking_time: bookingTime,
-                amount: 2000,
-            });
-            return res.data.bookingId;
-        } catch (e) {
-            console.error(e);
-            return null;
-        }
-    };
+    // Booking amount constant
+    const BOOKING_AMOUNT = 2000;
 
     const handleSend = async () => {
         if (!input.trim()) return;
@@ -232,7 +266,11 @@ export default function ChatPage() {
                     pushBot("Vui lòng chọn số hợp lệ.");
                     break;
                 }
-                setForm(prev => ({ ...prev, clinic: clinics[idx].id }));
+                setForm(prev => ({
+                    ...prev,
+                    clinic: clinics[idx].id,
+                    clinicName: clinics[idx].name
+                }));
                 askNext("clinic");
                 break;
             }
@@ -243,7 +281,11 @@ export default function ChatPage() {
                     pushBot("Vui lòng chọn số hợp lệ.");
                     break;
                 }
-                setForm(prev => ({ ...prev, service: services[idx].id }));
+                setForm(prev => ({
+                    ...prev,
+                    service: services[idx].id,
+                    serviceName: services[idx].name
+                }));
                 askNext("service");
                 break;
             }
@@ -255,18 +297,36 @@ export default function ChatPage() {
                     break;
                 }
 
-                const bookingTime = `${tempDay} ${slots[idx].time}:00`;
-                pushBot("Đang lưu lịch khám...");
+                const selectedTime = slots[idx].time;
+                const bookingTime = `${tempDay} ${selectedTime}:00`;
 
-                const bookingId = await createBooking(bookingTime);
+                pushBot(`Bạn đã chọn: ${tempDay} lúc ${selectedTime}`);
+                pushBot("Đang chuyển đến trang xác nhận...");
 
-                if (bookingId) {
-                    pushBot("Đặt lịch thành công!");
-                    // Delay to show message before redirect
-                    setTimeout(() => navigate(`/payment?bookingId=${bookingId}`), 1500);
-                } else {
-                    pushBot("Đặt lịch thất bại.");
-                }
+                // Prepare booking data for confirmation page
+                const bookingConfirmData: BookingConfirmData = {
+                    name: form.name,
+                    phone: form.phone,
+                    gender: form.gender,
+                    age: form.age || 0,
+                    symptoms: form.symptoms,
+                    clinicId: form.clinic || "",
+                    clinicName: form.clinicName || "",
+                    serviceId: form.service || "",
+                    serviceName: form.serviceName || "",
+                    bookingTime: bookingTime,
+                    displayDate: tempDay,
+                    displayTime: selectedTime,
+                    amount: BOOKING_AMOUNT,
+                    sourceRoute: "/chat", // Track source for back navigation
+                };
+
+                // Navigate to confirmation page with booking data
+                setTimeout(() => {
+                    navigate("/confirm-booking", {
+                        state: { bookingData: bookingConfirmData }
+                    });
+                }, 1000);
                 break;
             }
         }

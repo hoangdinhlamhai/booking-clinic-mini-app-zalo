@@ -7,6 +7,9 @@ import {
     Stethoscope,
     Clock,
     Loader2,
+    Users,
+    Calendar,
+    FileText,
 } from "lucide-react";
 import api from "@/lib/api";
 
@@ -45,6 +48,15 @@ interface SelectProps {
     disabled?: boolean;
     error?: string;
     icon?: React.ReactNode;
+}
+
+interface TextareaProps {
+    label: string;
+    value?: string;
+    icon?: React.ReactNode;
+    error?: string;
+    placeholder?: string;
+    onChange: (value: string) => void;
 }
 
 export default function BookingForm() {
@@ -105,6 +117,40 @@ export default function BookingForm() {
                 onChange={(v) => update("phone", v)}
             />
 
+            {/* Gender and Age Row */}
+            <div className="grid grid-cols-2 gap-4">
+                <Select
+                    label="Giới tính"
+                    icon={<Users className="w-5 h-5 text-slate-400" />}
+                    value={form.gender === true ? "male" : form.gender === false ? "female" : ""}
+                    options={[
+                        { id: "male", name: "Nam" },
+                        { id: "female", name: "Nữ" },
+                    ]}
+                    error={errors.gender}
+                    onChange={(v) => update("gender", v === "male")}
+                />
+
+                <Input
+                    label="Tuổi"
+                    type="number"
+                    icon={<Calendar className="w-5 h-5 text-slate-400" />}
+                    value={form.age?.toString() || ""}
+                    error={errors.age}
+                    onChange={(v) => update("age", v ? parseInt(v, 10) : undefined)}
+                />
+            </div>
+
+            {/* Symptoms */}
+            <Textarea
+                label="Triệu chứng"
+                icon={<FileText className="w-5 h-5 text-slate-400" />}
+                value={form.symptoms || ""}
+                error={errors.symptoms}
+                placeholder="Mô tả triệu chứng của bạn..."
+                onChange={(v) => update("symptoms", v)}
+            />
+
             <Select
                 label="Phòng khám"
                 icon={<Building2 className="w-5 h-5 text-slate-400" />}
@@ -112,8 +158,11 @@ export default function BookingForm() {
                 options={clinics}
                 error={errors.clinic}
                 onChange={(v) => {
+                    const selectedClinic = clinics.find(c => c.id === v);
                     update("clinic", v);
+                    update("clinicName", selectedClinic?.name || "");
                     update("service", "");
+                    update("serviceName", "");
                     update("appointmentDate", "");
                     update("appointmentTime", "");
                     setTimeSlots([]);
@@ -128,7 +177,9 @@ export default function BookingForm() {
                 disabled={!form.clinic}
                 error={errors.service}
                 onChange={(v) => {
+                    const selectedService = services.find(s => s.id === v);
                     update("service", v);
+                    update("serviceName", selectedService?.name || "");
                     update("appointmentDate", "");
                     update("appointmentTime", "");
                     setTimeSlots([]);
@@ -192,6 +243,33 @@ function Input({
                     min={min}
                     onChange={(e) => onChange(e.target.value)}
                     className={`w-full py-3 rounded-xl border appearance-none outline-none focus:ring-2 focus:ring-blue-500 transition-all ${icon ? "pl-10" : "pl-4"
+                        } ${error ? "border-red-500" : "border-slate-300"}`}
+                />
+            </div>
+            {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+        </div>
+    );
+}
+
+function Textarea({
+    label,
+    value,
+    icon,
+    error,
+    placeholder,
+    onChange,
+}: TextareaProps) {
+    return (
+        <div>
+            <label className="text-sm font-medium text-slate-700 block mb-1">{label}</label>
+            <div className="relative">
+                {icon && <span className="absolute left-3 top-3 pointer-events-none">{icon}</span>}
+                <textarea
+                    value={value ?? ""}
+                    placeholder={placeholder}
+                    rows={3}
+                    onChange={(e) => onChange(e.target.value)}
+                    className={`w-full py-3 rounded-xl border resize-none outline-none focus:ring-2 focus:ring-blue-500 transition-all ${icon ? "pl-10" : "pl-4"
                         } ${error ? "border-red-500" : "border-slate-300"}`}
                 />
             </div>

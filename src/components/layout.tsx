@@ -15,6 +15,7 @@ import LoginPage from "@/pages/login/index";
 import RegisterPage from "@/pages/register/index";
 import BookingsPage from "@/pages/booking/index";
 import ChatPage from "@/pages/chat/index";
+import ConfirmBookingPage from "@/pages/confirm-booking/index";
 import PaymentPage from "@/pages/payment/index";
 import ResultPage from "@/pages/result/index";
 
@@ -31,6 +32,7 @@ const Layout = () => {
               <Route path="/register" element={<RegisterPage />}></Route>
               <Route path="/booking" element={<BookingsPage />}></Route>
               <Route path="/chat" element={<ChatPage />}></Route>
+              <Route path="/confirm-booking" element={<ConfirmBookingPage />}></Route>
               <Route path="/payment" element={<PaymentPage />}></Route>
               <Route path="/result" element={<ResultPage />}></Route>
             </AnimationRoutes>
