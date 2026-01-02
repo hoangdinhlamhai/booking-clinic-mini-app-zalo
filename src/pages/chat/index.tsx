@@ -300,41 +300,52 @@ export default function ChatPage() {
                 {showDatePicker && (
                     <div className="mb-4">
                         <p className="text-sm font-medium text-slate-700 mb-2">Chọn ngày khám</p>
-                        <input
-                            type="date"
-                            className="w-full border rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-                            min={new Date().toISOString().split("T")[0]}
-                            onChange={async (e) => {
-                                const date = e.target.value;
-                                if (!date) return;
-
-                                setTempDay(date);
-                                setShowDatePicker(false);
-
-                                pushBot(`Ngày khám: ${date}`);
-                                pushBot("Đang kiểm tra giờ trống...");
-                                setSlots([]);
-
-                                try {
-                                    const res = await api.get(`/api/available-slots?clinic_id=${form.clinic}&service_id=${form.service}&date=${date}`);
-                                    const data: SlotStat[] = res.data || [];
-
-                                    if (!data.length) {
-                                        pushBot("Ngày này đã kín lịch. Vui lòng chọn ngày khác.");
-                                        setShowDatePicker(true);
+                        <div className="flex gap-2">
+                            <input
+                                placeholder="Nhấn vào đây để chọn ngày"
+                                type="date"
+                                className="flex-1 border rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                                min={new Date().toISOString().split("T")[0]}
+                                value={tempDay}
+                                onChange={(e) => setTempDay(e.target.value)}
+                            />
+                            <button
+                                onClick={async () => {
+                                    if (!tempDay) {
+                                        pushBot("Vui lòng chọn ngày trước.");
                                         return;
                                     }
 
-                                    setSlots(data);
-                                    setStep("time");
-                                    pushBot("Chọn giờ khám (nhập số thứ tự):");
-                                    pushBot(data.map((s, i) => `${i + 1}. ${s.time}`).join("\n"));
-                                } catch (err) {
-                                    pushBot("Lỗi kiểm tra lịch, vui lòng thử lại.");
-                                    setShowDatePicker(true);
-                                }
-                            }}
-                        />
+                                    setShowDatePicker(false);
+                                    pushBot(`Ngày khám: ${tempDay}`);
+                                    pushBot("Đang kiểm tra giờ trống...");
+                                    setSlots([]);
+
+                                    try {
+                                        const res = await api.get(`/api/available-slots?clinic_id=${form.clinic}&service_id=${form.service}&date=${tempDay}`);
+                                        const data: SlotStat[] = res.data || [];
+
+                                        if (!data.length) {
+                                            pushBot("Ngày này đã kín lịch. Vui lòng chọn ngày khác.");
+                                            setShowDatePicker(true);
+                                            return;
+                                        }
+
+                                        setSlots(data);
+                                        setStep("time");
+                                        pushBot("Chọn giờ khám (nhập số thứ tự):");
+                                        pushBot(data.map((s, i) => `${i + 1}. ${s.time}`).join("\n"));
+                                    } catch (err) {
+                                        pushBot("Lỗi kiểm tra lịch, vui lòng thử lại.");
+                                        setShowDatePicker(true);
+                                    }
+                                }}
+                                disabled={!tempDay}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Xác nhận
+                            </button>
+                        </div>
                     </div>
                 )}
 
