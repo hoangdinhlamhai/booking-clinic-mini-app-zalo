@@ -125,12 +125,12 @@ export default function ConfirmBookingPage() {
     return (
         <Page className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
             {/* Header */}
-            <div className="bg-blue-600 text-white px-6 py-4 fixed top-0 w-full z-10 shadow-md">
+            {/* <div className="bg-blue-600 text-white px-6 py-4 fixed top-0 w-full z-10 shadow-md">
                 <h2 className="text-lg font-semibold">Xác nhận đặt lịch</h2>
-            </div>
+            </div> */}
 
             {/* Content */}
-            <div className="pt-20 pb-32 px-4">
+            <div className="pt-10 pb-32 px-4">
                 {/* Success Icon */}
                 <div className="flex justify-center mb-6">
                     <div className="bg-green-100 p-4 rounded-full">

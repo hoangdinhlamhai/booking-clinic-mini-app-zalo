@@ -77,6 +77,14 @@ export default function ChatPage() {
     // Selection State
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDay, setTempDay] = useState("");
+    const [dateError, setDateError] = useState<string | null>(null);
+
+    // Minimum date for date picker (today) - use toLocaleDateString to avoid UTC timezone issues
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    // Use "en-CA" locale to get yyyy-mm-dd format in local timezone
+    const minDate = today.toLocaleDateString("en-CA");
+
     const [form, setForm] = useState<BookingFormState>({
         name: "",
         phone: "",
@@ -338,12 +346,12 @@ export default function ChatPage() {
     return (
         <Page className="flex flex-col h-screen bg-white">
             {/* Header - could reuse global header or custom simple one */}
-            <div className="bg-blue-600 text-white px-6 py-4 fixed top-0 w-full z-10 shadow-md">
+            {/* <div className="bg-blue-600 text-white px-6 py-4 fixed top-0 w-full z-10 shadow-md">
                 <h2 className="text-lg font-semibold">Chat đặt lịch khám</h2>
-            </div>
+            </div> */}
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto pt-20 pb-20 px-4 space-y-4 bg-gray-50">
+            <div className="flex-1 overflow-y-auto pt-4 pb-20 px-4 space-y-4 bg-gray-50">
                 {messages.map((m, i) => (
                     <div key={i} className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
                         <div className={`px-4 py-2 rounded-xl text-sm whitespace-pre-line max-w-[80%] shadow-sm ${m.from === "user" ? "bg-blue-600 text-white rounded-br-none" : "bg-white text-slate-800 rounded-bl-none border border-gray-100"
@@ -364,10 +372,21 @@ export default function ChatPage() {
                             <input
                                 placeholder="Nhấn vào đây để chọn ngày"
                                 type="date"
-                                className="flex-1 border rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-                                min={new Date().toISOString().split("T")[0]}
+                                className={`flex-1 border rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 ${dateError ? 'border-red-500' : ''}`}
+                                min={minDate}
                                 value={tempDay}
-                                onChange={(e) => setTempDay(e.target.value)}
+                                onChange={(e) => {
+                                    const selectedDate = e.target.value;
+                                    // Clear previous error
+                                    setDateError(null);
+
+                                    // Validate that selected date is not in the past
+                                    if (selectedDate && selectedDate < minDate) {
+                                        setDateError("Vui lòng chọn ngày từ hôm nay trở đi");
+                                        return;
+                                    }
+                                    setTempDay(selectedDate);
+                                }}
                             />
                             <button
                                 onClick={async () => {
@@ -406,6 +425,9 @@ export default function ChatPage() {
                                 Xác nhận
                             </button>
                         </div>
+                        {dateError && (
+                            <p className="text-sm text-red-600 mt-2">{dateError}</p>
+                        )}
                     </div>
                 )}
 

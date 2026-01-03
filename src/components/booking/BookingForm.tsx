@@ -64,7 +64,9 @@ export default function BookingForm() {
     const [clinics, setClinics] = useState<Option[]>([]);
     const [services, setServices] = useState<Option[]>([]);
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+    const [slotsLoaded, setSlotsLoaded] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [dateError, setDateError] = useState<string | null>(null);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     // date input requires yyyy-mm-dd format
@@ -82,13 +84,20 @@ export default function BookingForm() {
     }, []);
 
     useEffect(() => {
-        if (!form.clinic || !form.service || !form.appointmentDate) return;
+        if (!form.clinic || !form.service || !form.appointmentDate) {
+            setSlotsLoaded(false);
+            return;
+        }
 
+        setSlotsLoaded(false);
         api.get(
             `/api/available-slots?clinic_id=${form.clinic}&service_id=${form.service}&date=${form.appointmentDate}`
         )
             .then((r) => r.data)
-            .then((d: TimeSlot[]) => setTimeSlots(d));
+            .then((d: TimeSlot[]) => {
+                setTimeSlots(d);
+                setSlotsLoaded(true);
+            });
     }, [form.clinic, form.service, form.appointmentDate]);
 
     if (loading) {
@@ -191,14 +200,28 @@ export default function BookingForm() {
                 type="date"
                 icon={<Clock className="w-5 h-5 text-slate-400" />}
                 value={form.appointmentDate}
-                error={errors.appointmentDate}
+                error={errors.appointmentDate || dateError || undefined}
                 min={minDate}
                 onChange={(v) => {
+                    // Clear previous date error
+                    setDateError(null);
+
+                    // Validate that selected date is not in the past
+                    if (v && v < minDate) {
+                        setDateError("Vui lòng chọn ngày từ hôm nay trở đi");
+                        return;
+                    }
                     update("appointmentDate", v);
                     update("appointmentTime", "");
                     setTimeSlots([]);
                 }}
             />
+
+            {slotsLoaded && timeSlots.length === 0 && (
+                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
+                    <span className="font-medium">Không có giờ khám trống</span> trong ngày này. Vui lòng chọn ngày khác.
+                </div>
+            )}
 
             <Select
                 label="Giờ khám"

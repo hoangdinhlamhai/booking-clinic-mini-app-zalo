@@ -177,36 +177,11 @@ export default function LoginPage() {
                     </div>
 
                     {/* DIVIDER */}
-                    <div className="flex items-center gap-4 text-slate-400 text-xs">
+                    {/* <div className="flex items-center gap-4 text-slate-400 text-xs">
                         <div className="flex-1 h-px bg-slate-200" />
                         <span>Hoặc đăng nhập với</span>
                         <div className="flex-1 h-px bg-slate-200" />
-                    </div>
-
-                    {/* ZALO LOGIN */}
-                    <button
-                        onClick={handleZaloLogin}
-                        disabled={isZaloLoading}
-                        className="w-full flex items-center justify-center gap-4 
-                            bg-[#0068FF] hover:bg-[#0055DD] text-white
-                            rounded-xl py-4 transition-all font-medium shadow-sm
-                            hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                        {isZaloLoading ? (
-                            <>
-                                {/* <Spinner size="small" /> */}
-                                <span>Đang đăng nhập...</span>
-                            </>
-                        ) : (
-                            <>
-                                {/* Zalo Icon */}
-                                {/* <svg viewBox="0 0 48 48" className="w-5 h-5" fill="currentColor">
-                                    <path d="M24 4C12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20S35.046 4 24 4zm8.5 26.5c-.276 0-.5-.224-.5-.5V18.5c0-.276.224-.5.5-.5h2c.276 0 .5.224.5.5V30c0 .276-.224.5-.5.5h-2zm-16-12h7.3l-7.8 10.4v1.6h10.5v-2h-7.3l7.8-10.4v-1.6H16.5v2zm-3 0c-.276 0-.5.224-.5.5v8c0 .276.224.5.5.5h2c.276 0 .5-.224.5-.5v-8c0-.276-.224-.5-.5-.5h-2z" />
-                                </svg> */}
-                                <span>Zalo</span>
-                            </>
-                        )}
-                    </button>
+                    </div> */}
 
                     {/* REGISTER LINK */}
                     <div className="text-center text-sm text-slate-600">
