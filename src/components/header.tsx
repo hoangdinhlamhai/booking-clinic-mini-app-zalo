@@ -8,13 +8,13 @@ export default function Header() {
     const location = useLocation();
 
     // Hide header
-    if (location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/payment") {
+    if (location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/payment" || location.pathname === "/confirm-booking") {
         return null;
     }
 
     return (
-        <header className="bg-white border-b border-slate-100 sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <header className="bg-white border-b border-slate-100 sticky top-0 z-50" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+            <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
                 <div onClick={() => navigate("/")} className="text-xl font-semibold text-blue-600 cursor-pointer">
                     Health<span className="text-slate-800">Booking</span>
                 </div>

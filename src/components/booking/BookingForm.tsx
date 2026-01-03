@@ -236,13 +236,13 @@ function Input({
         <div>
             <label className="text-sm font-medium text-slate-700 block mb-1">{label}</label>
             <div className="relative">
-                {icon && <span className="absolute left-3 top-3 pointer-events-none">{icon}</span>}
+                {icon && <span className="absolute left-3 inset-y-0 flex items-center pointer-events-none">{icon}</span>}
                 <input
                     type={type}
                     value={value ?? ""}
                     min={min}
                     onChange={(e) => onChange(e.target.value)}
-                    className={`w-full py-3 rounded-xl border appearance-none outline-none focus:ring-2 focus:ring-blue-500 transition-all ${icon ? "pl-10" : "pl-4"
+                    className={`w-full py-3 min-h-[48px] rounded-xl border appearance-none outline-none focus:ring-2 focus:ring-blue-500 transition-all ${icon ? "pl-10" : "pl-4"
                         } ${error ? "border-red-500" : "border-slate-300"}`}
                 />
             </div>
@@ -269,8 +269,7 @@ function Textarea({
                     placeholder={placeholder}
                     rows={3}
                     onChange={(e) => onChange(e.target.value)}
-                    className={`w-full py-3 rounded-xl border resize-none outline-none focus:ring-2 focus:ring-blue-500 transition-all ${icon ? "pl-10" : "pl-4"
-                        } ${error ? "border-red-500" : "border-slate-300"}`}
+                    className={`w-full py-3 pl-4 rounded-xl border resize-none outline-none focus:ring-2 focus:ring-blue-500 transition-all ${error ? "border-red-500" : "border-slate-300"}`}
                 />
             </div>
             {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
