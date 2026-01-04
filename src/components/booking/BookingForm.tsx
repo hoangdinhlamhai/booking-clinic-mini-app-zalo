@@ -249,7 +249,7 @@ export default function BookingForm() {
                 disabled={timeSlots.length === 0}
                 options={timeSlots.map((s) => ({
                     id: s.time,
-                    name: `${s.time} (còn ${s.available} chỗ)`,
+                    name: s.time,
                 }))}
                 error={errors.appointmentTime}
                 onChange={(v) => update("appointmentTime", v)}
