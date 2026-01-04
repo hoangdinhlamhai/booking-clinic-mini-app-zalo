@@ -29,7 +29,7 @@ export default function Header() {
     return (
         <header className="bg-white border-b border-slate-100 sticky top-0 z-50" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
             <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-                {/* Left side: Back button + Logo */}
+                {/* Left side: Back button + User info */}
                 <div className="flex items-center gap-2">
                     {/* Back button - show on all pages except homepage */}
                     {!isHomePage && (
@@ -42,14 +42,7 @@ export default function Header() {
                         </button>
                     )}
 
-                    {/* Logo */}
-                    <div onClick={() => navigate("/")} className="text-xl font-semibold text-blue-600 cursor-pointer">
-                        Health<span className="text-slate-800">Booking</span>
-                    </div>
-                </div>
-
-                {/* Right side: User info */}
-                <div className="flex items-center gap-4">
+                    {/* User info / Login button */}
                     {isLoading && (
                         <div className="text-sm text-slate-400">...</div>
                     )}
@@ -70,7 +63,7 @@ export default function Header() {
                                     className="w-9 h-9 rounded-full"
                                 />
                             )}
-                            <span className="text-sm font-medium text-slate-700 hidden sm:inline">
+                            <span className="text-sm font-medium text-slate-700 max-w-[100px] truncate">
                                 {user.name}
                             </span>
                             <button
@@ -81,6 +74,11 @@ export default function Header() {
                             </button>
                         </div>
                     )}
+                </div>
+
+                {/* Right side: Logo */}
+                <div onClick={() => navigate("/")} className="text-xl font-semibold text-blue-600 cursor-pointer">
+                    Health<span className="text-slate-800">Booking</span>
                 </div>
             </div>
         </header>

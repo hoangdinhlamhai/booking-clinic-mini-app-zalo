@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Page, useNavigate, Spinner } from "zmp-ui";
-import { ShieldCheck, Mail, Lock } from "lucide-react";
+import { ShieldCheck, Mail, Lock, ArrowLeft } from "lucide-react";
 import { getAccessToken, authorize, getSetting } from "zmp-sdk";
 import api from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,12 +10,29 @@ export default function LoginPage() {
     const { login } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [isZaloLoading, setIsZaloLoading] = useState(false);
+    const [emailError, setEmailError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         email: "",
         password: "",
     });
 
+    // Email validation regex
+    const isValidEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
     const handleCredentialsLogin = async () => {
+        // Validate email format
+        if (!formData.email || !isValidEmail(formData.email)) {
+            setEmailError("Vui lòng nhập email hợp lệ");
+            return;
+        }
+        if (!formData.password) {
+            alert("Vui lòng nhập mật khẩu");
+            return;
+        }
+
         setIsLoading(true);
         try {
             const res = await api.post("/api/auth/login", formData);
@@ -121,6 +138,21 @@ export default function LoginPage() {
             <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyan-200 rounded-full blur-3xl opacity-40" />
 
             <div className="relative w-full max-w-lg px-4">
+                {/* Back Button */}
+                <button
+                    onClick={() => {
+                        if (window.history.length > 1) {
+                            window.history.back();
+                        } else {
+                            navigate("/");
+                        }
+                    }}
+                    className="absolute top-0 left-4 p-2 rounded-full bg-white shadow-md hover:bg-slate-50 transition text-slate-600 z-10"
+                    aria-label="Quay lại"
+                >
+                    <ArrowLeft className="w-5 h-5" />
+                </button>
+
                 <div className="bg-white rounded-3xl shadow-xl p-10 space-y-8">
                     {/* HEADER */}
                     <div className="space-y-3 text-center">
@@ -144,12 +176,22 @@ export default function LoginPage() {
                                 <input
                                     type="email"
                                     required
-                                    className="w-full pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                    className={`w-full pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${emailError ? 'border-red-500' : ''}`}
                                     placeholder="name@example.com"
                                     value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    onChange={(e) => {
+                                        const email = e.target.value;
+                                        setFormData({ ...formData, email });
+                                        // Validate email on change
+                                        if (email && !isValidEmail(email)) {
+                                            setEmailError("Email không hợp lệ");
+                                        } else {
+                                            setEmailError(null);
+                                        }
+                                    }}
                                 />
                             </div>
+                            {emailError && <p className="text-sm text-red-600 mt-1">{emailError}</p>}
                         </div>
 
                         <div className="space-y-2">
