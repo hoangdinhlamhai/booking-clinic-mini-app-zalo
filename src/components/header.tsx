@@ -1,32 +1,55 @@
 import React from "react";
 import { useNavigate, useLocation } from "zmp-ui";
 import { useAuth } from "../hooks/useAuth";
+import { ArrowLeft } from "lucide-react";
 
 export default function Header() {
     const { user, isLoading, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Hide header
-    if (location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/payment" || location.pathname === "/confirm-booking") {
+    // Hide header on these pages
+    if (location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/payment" || location.pathname === "/confirm-booking" || location.pathname === "/result") {
         return null;
     }
 
+    // Check if we're on homepage
+    const isHomePage = location.pathname === "/";
+
+    // Handle back navigation
+    const handleBack = () => {
+        // Try to go back in history, fallback to homepage
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            navigate("/");
+        }
+    };
+
     return (
         <header className="bg-white border-b border-slate-100 sticky top-0 z-50" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-            <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-                <div onClick={() => navigate("/")} className="text-xl font-semibold text-blue-600 cursor-pointer">
-                    Health<span className="text-slate-800">Booking</span>
+            <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+                {/* Left side: Back button + Logo */}
+                <div className="flex items-center gap-2">
+                    {/* Back button - show on all pages except homepage */}
+                    {!isHomePage && (
+                        <button
+                            onClick={handleBack}
+                            className="p-2 -ml-2 rounded-full hover:bg-slate-100 transition text-slate-600"
+                            aria-label="Quay lại"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
+                    )}
+
+                    {/* Logo */}
+                    <div onClick={() => navigate("/")} className="text-xl font-semibold text-blue-600 cursor-pointer">
+                        Health<span className="text-slate-800">Booking</span>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-6">
-                    {/* <div
-                        onClick={() => navigate("/")}
-                        className="text-sm text-slate-700 hover:text-blue-600 cursor-pointer"
-                    >
-                        Hướng dẫn đặt lịch
-                    </div> */}
-
+                {/* Right side: User info */}
+                <div className="flex items-center gap-4">
                     {isLoading && (
                         <div className="text-sm text-slate-400">...</div>
                     )}
@@ -47,7 +70,7 @@ export default function Header() {
                                     className="w-9 h-9 rounded-full"
                                 />
                             )}
-                            <span className="text-sm font-medium text-slate-700">
+                            <span className="text-sm font-medium text-slate-700 hidden sm:inline">
                                 {user.name}
                             </span>
                             <button

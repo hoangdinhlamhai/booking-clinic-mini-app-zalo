@@ -350,8 +350,8 @@ export default function ChatPage() {
                 <h2 className="text-lg font-semibold">Chat đặt lịch khám</h2>
             </div> */}
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto pt-4 pb-20 px-4 space-y-4 bg-gray-50">
+            {/* Messages - increase pb when date picker is visible to avoid covering messages */}
+            <div className={`flex-1 overflow-y-auto pt-28 px-4 space-y-4 bg-gray-50 ${showDatePicker ? 'pb-44' : 'pb-24'}`}>
                 {messages.map((m, i) => (
                     <div key={i} className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
                         <div className={`px-4 py-2 rounded-xl text-sm whitespace-pre-line max-w-[80%] shadow-sm ${m.from === "user" ? "bg-blue-600 text-white rounded-br-none" : "bg-white text-slate-800 rounded-bl-none border border-gray-100"
@@ -377,15 +377,17 @@ export default function ChatPage() {
                                 value={tempDay}
                                 onChange={(e) => {
                                     const selectedDate = e.target.value;
-                                    // Clear previous error
-                                    setDateError(null);
 
-                                    // Validate that selected date is not in the past
+                                    // Always update tempDay first
+                                    setTempDay(selectedDate);
+
+                                    // Validate that selected date is not in the past (strictly before today)
                                     if (selectedDate && selectedDate < minDate) {
                                         setDateError("Vui lòng chọn ngày từ hôm nay trở đi");
-                                        return;
+                                    } else {
+                                        // Clear error if date is valid (today or future)
+                                        setDateError(null);
                                     }
-                                    setTempDay(selectedDate);
                                 }}
                             />
                             <button
@@ -419,7 +421,7 @@ export default function ChatPage() {
                                         setShowDatePicker(true);
                                     }
                                 }}
-                                disabled={!tempDay}
+                                disabled={!tempDay || !!dateError}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Xác nhận
@@ -433,15 +435,17 @@ export default function ChatPage() {
 
                 <div className="flex gap-2 items-center">
                     <input
-                        className="flex-1 bg-gray-100 border-0 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-gray-400"
-                        placeholder="Nhập trả lời..."
+                        className={`flex-1 bg-gray-100 border-0 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-gray-400 ${showDatePicker ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        placeholder={showDatePicker ? "Vui lòng chọn ngày ở trên..." : "Nhập trả lời..."}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                        onKeyDown={(e) => e.key === "Enter" && !showDatePicker && handleSend()}
+                        disabled={showDatePicker}
                     />
                     <button
                         onClick={handleSend}
-                        className="p-3 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors shadow-sm"
+                        disabled={showDatePicker}
+                        className={`p-3 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors shadow-sm ${showDatePicker ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         <Send className="w-5 h-5" />
                     </button>

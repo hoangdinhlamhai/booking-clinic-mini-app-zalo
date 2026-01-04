@@ -1,5 +1,5 @@
 import { useNavigate } from "zmp-ui";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import api from "@/lib/api";
 import { generateSepayQR } from "@/lib/payment/sepayqr";
 import { useSearchParams } from "react-router-dom"; // ZMP uses standard router hooks often or ZMPRouter equivalent
@@ -30,15 +30,20 @@ type BookingResponse = {
     amount: number;
 };
 
+const PAYMENT_TIMEOUT_SECONDS = 300;
+
 // Main Component
 import { Page, Text, Button } from "zmp-ui";
-import { Loader2 } from "lucide-react";
+import { Loader2, Clock } from "lucide-react";
 
 export default function PaymentPage() {
     const { bookingId } = usePayment();
     const navigate = useNavigate();
     const [booking, setBooking] = useState<BookingResponse | null>(null);
+    const [countdown, setCountdown] = useState<number>(PAYMENT_TIMEOUT_SECONDS);
+    const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+    // Fetch booking data
     useEffect(() => {
         if (!bookingId) return;
 
@@ -51,6 +56,33 @@ export default function PaymentPage() {
             .catch(() => { });
     }, [bookingId]);
 
+    // Countdown timer
+    useEffect(() => {
+        if (!bookingId || !booking) return;
+
+        // Start countdown
+        countdownRef.current = setInterval(() => {
+            setCountdown((prev) => {
+                if (prev <= 1) {
+                    // Time's up - navigate to expired result
+                    if (countdownRef.current) {
+                        clearInterval(countdownRef.current);
+                    }
+                    navigate(`/result?bookingId=${bookingId}&status=expired`, { replace: true });
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => {
+            if (countdownRef.current) {
+                clearInterval(countdownRef.current);
+            }
+        };
+    }, [bookingId, booking, navigate]);
+
+    // Poll for payment status
     useEffect(() => {
         if (!bookingId) return;
 
@@ -63,18 +95,17 @@ export default function PaymentPage() {
 
                 setBooking(data);
 
-                // if (data.status === "paid") {
-                //   navigate(`/result?bookingId=${bookingId}&status=paid`);
-                // }
-                // if (data.status === "expired") {
-                //   navigate(`/result?bookingId=${bookingId}&status=expired`);
-                // }
-
                 // ZMP navigate often replaces
                 if (data.status === "paid") {
+                    if (countdownRef.current) {
+                        clearInterval(countdownRef.current);
+                    }
                     navigate(`/result?bookingId=${bookingId}&status=paid`, { replace: true });
                 }
                 if (data.status === "expired") {
+                    if (countdownRef.current) {
+                        clearInterval(countdownRef.current);
+                    }
                     navigate(`/result?bookingId=${bookingId}&status=expired`, { replace: true });
                 }
 
@@ -83,6 +114,13 @@ export default function PaymentPage() {
 
         return () => clearInterval(timer);
     }, [bookingId, navigate]);
+
+    // Format countdown to MM:SS
+    const formatCountdown = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
 
     if (!booking) {
         return (
@@ -106,6 +144,17 @@ export default function PaymentPage() {
         <Page className="min-h-screen flex items-center justify-center bg-slate-50">
             <div className="bg-white p-6 rounded-xl text-center space-y-4 shadow-lg mx-4 w-full max-w-sm">
                 <h1 className="text-lg font-semibold text-slate-900">Thanh toán giữ lịch</h1>
+
+                {/* Countdown Timer */}
+                <div className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl ${countdown <= 30 ? 'bg-red-50' : 'bg-orange-50'}`}>
+                    <Clock className={`w-5 h-5 ${countdown <= 30 ? 'text-red-500' : 'text-orange-500'}`} />
+                    <span className={`font-mono text-xl font-bold ${countdown <= 30 ? 'text-red-600' : 'text-orange-600'}`}>
+                        {formatCountdown(countdown)}
+                    </span>
+                    <span className={`text-sm ${countdown <= 30 ? 'text-red-500' : 'text-orange-500'}`}>
+                        còn lại
+                    </span>
+                </div>
 
                 <div className="flex justify-center">
                     <img src={qrUrl} className="w-64 h-64 object-contain" alt="QR Code" />

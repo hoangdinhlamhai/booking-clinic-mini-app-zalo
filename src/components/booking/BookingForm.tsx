@@ -32,6 +32,7 @@ interface InputProps {
     icon?: React.ReactNode;
     error?: string;
     min?: string;
+    maxLength?: number;
     onChange: (value: string) => void;
 }
 
@@ -67,6 +68,7 @@ export default function BookingForm() {
     const [slotsLoaded, setSlotsLoaded] = useState(false);
     const [loading, setLoading] = useState(true);
     const [dateError, setDateError] = useState<string | null>(null);
+    const [phoneError, setPhoneError] = useState<string | null>(null);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     // date input requires yyyy-mm-dd format
@@ -120,10 +122,27 @@ export default function BookingForm() {
 
             <Input
                 label="Số điện thoại"
+                type="tel"
                 icon={<Phone className="w-5 h-5 text-slate-400" />}
                 value={form.phone}
-                error={errors.phone}
-                onChange={(v) => update("phone", v)}
+                error={errors.phone || phoneError || undefined}
+                maxLength={10}
+                onChange={(v) => {
+                    // Only allow digits
+                    const digitsOnly = v.replace(/\D/g, '');
+                    // Limit to 10 characters
+                    const limitedValue = digitsOnly.slice(0, 10);
+                    update("phone", limitedValue);
+
+                    // Validate phone number
+                    if (limitedValue.length === 0) {
+                        setPhoneError(null);
+                    } else if (limitedValue.length < 10) {
+                        setPhoneError(`Còn thiếu ${10 - limitedValue.length} số`);
+                    } else {
+                        setPhoneError(null);
+                    }
+                }}
             />
 
             {/* Gender and Age Row */}
@@ -203,17 +222,18 @@ export default function BookingForm() {
                 error={errors.appointmentDate || dateError || undefined}
                 min={minDate}
                 onChange={(v) => {
-                    // Clear previous date error
-                    setDateError(null);
-
-                    // Validate that selected date is not in the past
-                    if (v && v < minDate) {
-                        setDateError("Vui lòng chọn ngày từ hôm nay trở đi");
-                        return;
-                    }
+                    // Always update form first
                     update("appointmentDate", v);
                     update("appointmentTime", "");
                     setTimeSlots([]);
+
+                    // Validate that selected date is not in the past (strictly before today)
+                    if (v && v < minDate) {
+                        setDateError("Vui lòng chọn ngày từ hôm nay trở đi");
+                    } else {
+                        // Clear error if date is valid (today or future)
+                        setDateError(null);
+                    }
                 }}
             />
 
@@ -253,6 +273,7 @@ function Input({
     icon,
     error,
     min,
+    maxLength,
     onChange,
 }: InputProps) {
     return (
@@ -264,6 +285,7 @@ function Input({
                     type={type}
                     value={value ?? ""}
                     min={min}
+                    maxLength={maxLength}
                     onChange={(e) => onChange(e.target.value)}
                     className={`w-full py-3 min-h-[48px] rounded-xl border appearance-none outline-none focus:ring-2 focus:ring-blue-500 transition-all ${icon ? "pl-10" : "pl-4"
                         } ${error ? "border-red-500" : "border-slate-300"}`}
