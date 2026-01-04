@@ -239,13 +239,13 @@ export default function HomePage() {
             Chủ động thời gian – minh bạch chi phí – an tâm điều trị
           </p>
 
-          <button
+          {/* <button
             onClick={() => navigate("/booking")}
             className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-10 py-5 text-lg text-blue-600 font-bold hover:bg-blue-50 transition-all hover:shadow-2xl hover:scale-105"
           >
             Đăng ký ngay
             <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </button>
+          </button> */}
         </div>
       </section>
     </Page>

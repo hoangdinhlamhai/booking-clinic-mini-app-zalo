@@ -11,6 +11,7 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isZaloLoading, setIsZaloLoading] = useState(false);
     const [emailError, setEmailError] = useState<string | null>(null);
+    const [loginError, setLoginError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -29,9 +30,12 @@ export default function LoginPage() {
             return;
         }
         if (!formData.password) {
-            alert("Vui lòng nhập mật khẩu");
+            setLoginError("Vui lòng nhập mật khẩu");
             return;
         }
+
+        // Clear previous errors
+        setLoginError(null);
 
         setIsLoading(true);
         try {
@@ -49,10 +53,8 @@ export default function LoginPage() {
             }
         } catch (error: any) {
             console.error(error);
-            const msg = error.response?.data?.error || "Đăng nhập thất bại";
-            // In ZMP, simple alert:
-            // openSnackbar or just native alert for simplicity now
-            alert(msg);
+            const msg = error.response?.data?.error || "Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.";
+            setLoginError(msg);
             setIsLoading(false);
         }
     };
@@ -140,13 +142,7 @@ export default function LoginPage() {
             <div className="relative w-full max-w-lg px-4">
                 {/* Back Button */}
                 <button
-                    onClick={() => {
-                        if (window.history.length > 1) {
-                            window.history.back();
-                        } else {
-                            navigate("/");
-                        }
-                    }}
+                    onClick={() => navigate("/")}
                     className="absolute top-0 left-4 p-2 rounded-full bg-white shadow-md hover:bg-slate-50 transition text-slate-600 z-10"
                     aria-label="Quay lại"
                 >
@@ -201,13 +197,23 @@ export default function LoginPage() {
                                 <input
                                     type="password"
                                     required
-                                    className="w-full pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                    className={`w-full pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${loginError ? 'border-red-500' : ''}`}
                                     placeholder="••••••••"
                                     value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, password: e.target.value });
+                                        if (loginError) setLoginError(null);
+                                    }}
                                 />
                             </div>
                         </div>
+
+                        {/* Login Error Message */}
+                        {loginError && (
+                            <div className="p-3 rounded-xl bg-red-50 border border-red-200">
+                                <p className="text-sm text-red-600 text-center">{loginError}</p>
+                            </div>
+                        )}
 
                         <button
                             onClick={handleCredentialsLogin}

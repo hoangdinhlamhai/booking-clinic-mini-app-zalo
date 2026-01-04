@@ -68,13 +68,7 @@ export default function RegisterPage() {
             <div className="relative w-full max-w-lg px-4">
                 {/* Back Button */}
                 <button
-                    onClick={() => {
-                        if (window.history.length > 1) {
-                            window.history.back();
-                        } else {
-                            navigate("/");
-                        }
-                    }}
+                    onClick={() => navigate("/")}
                     className="absolute top-0 left-4 p-2 rounded-full bg-white shadow-md hover:bg-slate-50 transition text-slate-600 z-10"
                     aria-label="Quay lại"
                 >
