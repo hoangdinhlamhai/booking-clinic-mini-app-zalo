@@ -9,6 +9,7 @@ import {
   Clock,
   Users,
   Award,
+  ClipboardList,
 } from "lucide-react";
 
 const carouselItems = [
@@ -95,6 +96,14 @@ export default function HomePage() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-white border-2 border-slate-200 px-8 py-4 text-lg text-slate-700 font-semibold hover:border-blue-300 hover:bg-blue-50 transition-all"
                 >
                   Tư vấn
+                </button>
+
+                <button
+                  onClick={() => navigate("/history")}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white border-2 border-slate-200 px-8 py-4 text-lg text-slate-700 font-semibold hover:border-blue-300 hover:bg-blue-50 transition-all"
+                >
+                  <ClipboardList className="w-5 h-5" />
+                  Lịch sử đặt khám
                 </button>
               </div>
             </div>

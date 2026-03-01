@@ -18,6 +18,7 @@ import ChatPage from "@/pages/chat/index";
 import ConfirmBookingPage from "@/pages/confirm-booking/index";
 import PaymentPage from "@/pages/payment/index";
 import ResultPage from "@/pages/result/index";
+import HistoryPage from "@/pages/history/index";
 
 const Layout = () => {
   return (
@@ -35,6 +36,7 @@ const Layout = () => {
               <Route path="/confirm-booking" element={<ConfirmBookingPage />}></Route>
               <Route path="/payment" element={<PaymentPage />}></Route>
               <Route path="/result" element={<ResultPage />}></Route>
+              <Route path="/history" element={<HistoryPage />}></Route>
             </AnimationRoutes>
           </ZMPRouter>
         </AuthProvider>

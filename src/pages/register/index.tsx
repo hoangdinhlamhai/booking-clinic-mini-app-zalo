@@ -53,7 +53,9 @@ export default function RegisterPage() {
             // Redirect home
             navigate("/");
         } catch (error: any) {
-            const msg = error.response?.data?.error || error.message || "Đăng ký thất bại";
+            console.error("Register error:", error.response?.data || error);
+            // NestJS returns { message: "...", statusCode: 400 } format
+            const msg = error.response?.data?.message || error.response?.data?.error || error.message || "Đăng ký thất bại";
             alert(msg);
             setIsLoading(false);
         }

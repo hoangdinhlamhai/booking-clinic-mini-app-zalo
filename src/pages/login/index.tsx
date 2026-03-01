@@ -13,8 +13,8 @@ export default function LoginPage() {
     const [emailError, setEmailError] = useState<string | null>(null);
     const [loginError, setLoginError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
-        email: "",
-        password: "",
+        email: "lamhaichat@gmail.com",
+        password: "123456",
     });
 
     // Email validation regex
@@ -52,8 +52,9 @@ export default function LoginPage() {
                 navigate("/");
             }
         } catch (error: any) {
-            console.error(error);
-            const msg = error.response?.data?.error || "Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.";
+            console.error("Login error:", error.response?.data || error);
+            // NestJS returns { message: "...", statusCode: 401 } format
+            const msg = error.response?.data?.message || error.response?.data?.error || "Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.";
             setLoginError(msg);
             setIsLoading(false);
         }

@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Hardcoded for now based on the source code fallback, 
 // likely this should be an env variable in real app
-const BASE_URL = "https://booking-clinic-be.vercel.app";
+const BASE_URL = "https://lamhai.duckdns.org";
 
 const api = axios.create({
     baseURL: BASE_URL,
